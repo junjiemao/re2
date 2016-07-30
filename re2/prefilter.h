@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#ifndef RE2_PREFILTER_H_
+#define RE2_PREFILTER_H_
+
 // Prefilter is the class used to extract string guards from regexps.
 // Rather than using Prefilter class directly, use FilteredRE2.
 // See filtered_re2.h
-
-#ifndef RE2_PREFILTER_H_
-#define RE2_PREFILTER_H_
 
 #include "util/util.h"
 
@@ -93,9 +93,6 @@ class Prefilter {
   // node. This field is populated with a unique id for every node,
   // and -1 for duplicate nodes.
   int unique_id_;
-
-  // Used for debugging, helps in tracking memory leaks.
-  int alloc_id_;
 
   DISALLOW_COPY_AND_ASSIGN(Prefilter);
 };

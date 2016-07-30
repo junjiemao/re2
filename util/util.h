@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#ifndef RE2_UTIL_UTIL_H__
-#define RE2_UTIL_UTIL_H__
+#ifndef UTIL_UTIL_H_
+#define UTIL_UTIL_H_
 
 // C
 #include <stdio.h>
@@ -30,6 +30,10 @@
 #include <ostream>
 #include <utility>
 #include <set>
+#include <atomic>
+#include <mutex>        // For std::call_once
+#include <unordered_set>
+#include <initializer_list>
 
 // Use std names.
 using std::set;
@@ -44,22 +48,7 @@ using std::stack;
 using std::sort;
 using std::swap;
 using std::make_pair;
-
-#if defined(__GNUC__) && !defined(USE_CXX0X) && !defined(_LIBCPP_ABI_VERSION)
-
-#include <tr1/unordered_set>
-using std::tr1::unordered_set;
-
-#else
-
-#include <unordered_set>
-#if defined(_WIN32)
-using std::tr1::unordered_set;
-#else
 using std::unordered_set;
-#endif
-
-#endif
 
 #ifdef _WIN32
 
@@ -69,6 +58,8 @@ using std::unordered_set;
 #define strtoll _strtoi64
 #define strtoull _strtoui64
 #define vsnprintf vsnprintf_s
+
+#pragma warning(disable: 4200) // zero-sized array
 
 #endif
 
@@ -83,9 +74,7 @@ typedef uint32_t uint32;
 typedef int64_t int64;
 typedef uint64_t uint64;
 
-typedef unsigned long ulong;
 typedef unsigned int uint;
-typedef unsigned short ushort;
 
 // Prevent the compiler from complaining about or optimizing away variables
 // that appear unused.
@@ -112,6 +101,14 @@ template<bool> struct CompileAssert {};
   void operator=(const TypeName&)
 
 #define arraysize(array) (int)(sizeof(array)/sizeof((array)[0]))
+
+#ifndef FALLTHROUGH_INTENDED
+#define FALLTHROUGH_INTENDED do { } while (0)
+#endif
+
+#ifndef NO_THREAD_SAFETY_ANALYSIS
+#define NO_THREAD_SAFETY_ANALYSIS
+#endif
 
 class StringPiece;
 
@@ -146,4 +143,4 @@ bool RunningOnValgrind();
 #include "util/mutex.h"
 #include "util/utf.h"
 
-#endif // RE2_UTIL_UTIL_H__
+#endif  // UTIL_UTIL_H_

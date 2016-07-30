@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#ifndef UTIL_MUTEX_H_
+#define UTIL_MUTEX_H_
+
 /*
  * A simple mutex wrapper, supporting locks and read-write locks.
  * You should assume the locks are *not* re-entrant.
  */
-
-#ifndef RE2_UTIL_MUTEX_H_
-#define RE2_UTIL_MUTEX_H_
 
 #include <stdlib.h>
 
@@ -208,27 +208,6 @@ class WriterMutexLock {
 #define ReaderMutexLock(x) COMPILE_ASSERT(0, rmutex_lock_decl_missing_var_name)
 #define WriterMutexLock(x) COMPILE_ASSERT(0, wmutex_lock_decl_missing_var_name)
 
-// Provide safe way to declare and use global, linker-initialized mutex. Sigh.
-#if HAVE_PTHREAD
-
-#define GLOBAL_MUTEX(name) \
-	static pthread_mutex_t (name) = PTHREAD_MUTEX_INITIALIZER
-#define GLOBAL_MUTEX_LOCK(name) \
-	pthread_mutex_lock(&(name))
-#define GLOBAL_MUTEX_UNLOCK(name) \
-	pthread_mutex_unlock(&(name))
-
-#else
-
-#define GLOBAL_MUTEX(name) \
-	static Mutex name
-#define GLOBAL_MUTEX_LOCK(name) \
-	name.Lock()
-#define GLOBAL_MUTEX_UNLOCK(name) \
-	name.Unlock()
-
-#endif
-
 }  // namespace re2
 
-#endif  /* #define RE2_UTIL_MUTEX_H_ */
+#endif  // UTIL_MUTEX_H_

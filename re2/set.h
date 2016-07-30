@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#ifndef RE2_SET_H
-#define RE2_SET_H
+#ifndef RE2_SET_H_
+#define RE2_SET_H_
 
 #include <utility>
 #include <vector>
@@ -31,12 +31,12 @@ class RE2::Set {
 
   // Compile prepares the Set for matching.
   // Add must not be called again after Compile.
-  // Compile must be called before FullMatch or PartialMatch.
+  // Compile must be called before Match.
   // Compile may return false if it runs out of memory.
   bool Compile();
 
   // Match returns true if text matches any of the regexps in the set.
-  // If so, it fills v with the indices of the matching regexps.
+  // If so, it fills v (if not NULL) with the indices of the matching regexps.
   bool Match(const StringPiece& text, vector<int>* v) const;
 
  private:
@@ -52,4 +52,4 @@ class RE2::Set {
 
 }  // namespace re2
 
-#endif  // RE2_SET_H
+#endif  // RE2_SET_H_

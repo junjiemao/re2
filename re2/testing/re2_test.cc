@@ -6,7 +6,7 @@
 // TODO: Test extractions for PartialMatch/Consume
 
 #include <errno.h>
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 #include <unistd.h>  /* for sysconf */
 #include <sys/mman.h>
 #endif
@@ -16,8 +16,6 @@
 #include "util/test.h"
 #include "re2/re2.h"
 #include "re2/regexp.h"
-
-DECLARE_bool(logtostderr);
 
 namespace re2 {
 
@@ -881,11 +879,16 @@ TEST(RE2, FloatingPointFullMatchTypes) {
     // number, since C does not guarantee to get the correctly
     // rounded answer for strtod and strtof unless the input is
     // short.
+    //
+    // This is known to fail on Cygwin and MinGW due to a broken
+    // implementation of strtof(3). Sigh.
+#if !defined(__CYGWIN__) && !defined(__MINGW32__)
     CHECK(RE2::FullMatch("0.1", "(.*)", &v));
     CHECK_EQ(v, 0.1f) << StringPrintf("%.8g != %.8g", v, 0.1f);
     CHECK(RE2::FullMatch("6700000000081920.1", "(.*)", &v));
     CHECK_EQ(v, 6700000000081920.1f)
       << StringPrintf("%.8g != %.8g", v, 6700000000081920.1f);
+#endif
   }
   {
     double v;
@@ -1408,6 +1411,18 @@ TEST(RE2, UnicodeClasses) {
   EXPECT_EQ("鋒", c);
 }
 
+TEST(RE2, LazyRE2) {
+  // Test with and without options.
+  static LazyRE2 a = {"a"};
+  static LazyRE2 b = {"b", RE2::Latin1};
+
+  EXPECT_EQ("a", a->pattern());
+  EXPECT_EQ(RE2::Options::EncodingUTF8, a->options().encoding());
+
+  EXPECT_EQ("b", b->pattern());
+  EXPECT_EQ(RE2::Options::EncodingLatin1, b->options().encoding());
+}
+
 // Bug reported by saito. 2009/02/17
 TEST(RE2, NullVsEmptyString) {
   RE2 re(".*");
@@ -1540,7 +1555,7 @@ TEST(RE2, Bug18458852) {
 }
 
 TEST(RE2, Bug18523943) {
-  // Bug in bitstate: case kFailInst was merged into the default with LOG(DFATAL).
+  // Bug in BitState: case kFailInst failed the match entirely.
 
   RE2::Options opt;
   const char a[] = {
@@ -1559,7 +1574,7 @@ TEST(RE2, Bug18523943) {
   RE2 re((const char*)b, opt);
   CHECK(re.ok());
   string s1;
-  CHECK(!RE2::PartialMatch((const char*)a, re, &s1));
+  CHECK(RE2::PartialMatch((const char*)a, re, &s1));
 }
 
 TEST(RE2, Bug21371806) {
@@ -1585,10 +1600,10 @@ TEST(RE2, Bug26356109) {
   string s = "abc";
   StringPiece m;
 
-  CHECK(re.Match(s, 0, s.size(), RE2::UNANCHORED, &m, 1));
+  CHECK(re.Match(s, 0, static_cast<int>(s.size()), RE2::UNANCHORED, &m, 1));
   CHECK_EQ(m, s) << " (UNANCHORED) got m='" << m << "', want '" << s << "'";
 
-  CHECK(re.Match(s, 0, s.size(), RE2::ANCHOR_BOTH, &m, 1));
+  CHECK(re.Match(s, 0, static_cast<int>(s.size()), RE2::ANCHOR_BOTH, &m, 1));
   CHECK_EQ(m, s) << " (ANCHOR_BOTH) got m='" << m << "', want '" << s << "'";
 }
 
